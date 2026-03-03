@@ -1,3 +1,7 @@
-function fn1() {}
+function fn1(...args) {
+  console.log(...args);
+}
 
-function fn2() {}
+function fn2(...args) {
+  console.log(...args);
+}
