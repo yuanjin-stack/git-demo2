@@ -1,7 +1,7 @@
-function fn1() {
-  console.log('c1');
+function fn1(...args) {
+  console.log('c1', args);
 }
 
-function fn2() {
-  console.log('c2');
+function fn2(...args) {
+  console.log('c2', args);
 }
