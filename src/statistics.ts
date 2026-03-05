@@ -7,7 +7,7 @@ export type Stats = {
   median: number;
 };
 
-export function calculateStats(values: readonly number[]): any {
+export function calculateStats(values: readonly number[]): Stats {
   const normalized = normalizeFiniteNumbers(values);
   if (normalized.length === 0) {
     throw new ValidationError('values must contain at least one finite number');
