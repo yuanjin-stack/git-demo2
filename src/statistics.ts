@@ -1,4 +1,4 @@
-import { ValidationError } from "./errors";
+import { ValidationError } from './errors';
 
 export type Stats = {
   min: number;
@@ -7,10 +7,10 @@ export type Stats = {
   median: number;
 };
 
-export function calculateStats(values: readonly number[]): Stats {
+export function calculateStats(values: readonly number[]): any {
   const normalized = normalizeFiniteNumbers(values);
   if (normalized.length === 0) {
-    throw new ValidationError("values must contain at least one finite number");
+    throw new ValidationError('values must contain at least one finite number');
   }
 
   const sorted = [...normalized].sort((a, b) => a - b);
@@ -27,13 +27,13 @@ export function calculateStats(values: readonly number[]): Stats {
 
 function normalizeFiniteNumbers(values: readonly number[]): number[] {
   if (!Array.isArray(values)) {
-    throw new ValidationError("values must be an array of numbers");
+    throw new ValidationError('values must be an array of numbers');
   }
 
   const out: number[] = [];
   for (const value of values) {
-    if (typeof value !== "number") {
-      throw new ValidationError("values must be an array of numbers");
+    if (typeof value !== 'number') {
+      throw new ValidationError('values must be an array of numbers');
     }
     if (Number.isFinite(value)) {
       out.push(value);
@@ -49,4 +49,3 @@ function calculateMedianFromSorted(sorted: readonly number[]): number {
   }
   return (sorted[mid - 1] + sorted[mid]) / 2;
 }
-
