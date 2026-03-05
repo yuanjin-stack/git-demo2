@@ -1,0 +1,68 @@
+# 工作流名称：展示在 GitHub Actions 列表中
+name: PR Checks
+# 触发条件：在 PR 创建/更新等事件发生时触发
+on:
+  # PR 事件
+  pull_request:
+    # 仅在这些 PR 行为发生时运行
+    types: [opened, synchronize, reopened, ready_for_review]
+# 权限声明：尽量最小化 GITHUB_TOKEN 权限
+permissions:
+  # 仅需要读取仓库内容以便 checkout
+  contents: read
+# 并发控制：避免同一 PR/ref 重复跑多次
+concurrency:
+  # 并发分组：同一 workflow + 同一 ref 归为一组
+  group: pr-checks-${{ github.workflow }}-${{ github.ref }}
+  # 新的运行开始时取消旧的进行中运行
+  cancel-in-progress: true
+# 作业集合
+jobs:
+  # 作业名：执行所有检查
+  checks:
+    # 跳过 Draft PR（草稿 PR 不跑 CI）
+    if: ${{ github.event.pull_request.draft == false }}
+    # Runner：使用 GitHub 托管的 Ubuntu 环境
+    runs-on: ubuntu-latest
+    # 作业步骤：按顺序执行
+    steps:
+      # 步骤名称：Checkout
+      - name: Checkout
+        # 拉取仓库代码（PR 代码）
+        uses: actions/checkout@v4
+      # 步骤名称：Setup Node
+      - name: Setup Node
+        # 安装并配置 Node.js
+        uses: actions/setup-node@v4
+        # setup-node 输入参数
+        with:
+          # Node 版本：与 package.json engines 对齐
+          node-version: 22.14.0
+          # 启用 pnpm 缓存
+          cache: pnpm
+          # 指定 pnpm lockfile 用于缓存键
+          cache-dependency-path: pnpm-lock.yaml
+      # 步骤名称：Enable Corepack
+      - name: Enable Corepack
+        # 启用 Corepack（让 pnpm 版本由 packageManager 控制）
+        run: corepack enable
+      # 步骤名称：Install dependencies
+      - name: Install dependencies
+        # 使用 lockfile 安装依赖（保证可复现）
+        run: pnpm install --frozen-lockfile
+      # 步骤名称：Lint
+      - name: Lint
+        # 执行 ESLint
+        run: pnpm run lint
+      # 步骤名称：Typecheck
+      - name: Typecheck
+        # 执行 TypeScript 类型检查（不产物输出）
+        run: pnpm run typecheck
+      # 步骤名称：Unit tests
+      - name: Unit tests
+        # 为该步骤设置环境变量
+        env:
+          # CI 模式：让测试在 CI 下以非交互方式运行
+          CI: true
+        # 执行 Jest 单元测试
+        run: pnpm run test
