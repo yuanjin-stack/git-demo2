@@ -1,0 +1,26 @@
+name: Create Release on Tag
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Release Title
+        id: release_meta
+        shell: bash
+        run: |
+          echo "release_name=${GITHUB_REF_NAME} ($(date -u '+%Y-%m-%d %H:%M:%S UTC'))" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.release_meta.outputs.release_name }}
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
